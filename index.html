@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login / Sign Up</title>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyC6P7wlNv0qLL634yoLAVFC_8Pjjn_dRvA",
+          authDomain: "novavault.firebaseapp.com",
+          projectId: "novavault",
+          storageBucket: "novavault.appspot.com",
+          messagingSenderId: "882868843122",
+          appId: "1:882868843122:web:45750d9a47d97a6486c8eb",
+          measurementId: "G-M2C71W3JJ7"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth();
+        const provider = new GoogleAuthProvider();
+
+        // Function to handle user sign-up
+        async function signUp(email, password) {
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                redirectToWelcomePage(userCredential.user);
+            } catch (error) {
+                alert("Error during sign up: " + error.message);
+            }
+        }
+
+        // Function to handle user login
+        async function login(email, password) {
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                redirectToWelcomePage(userCredential.user);
+            } catch (error) {
+                alert("Error during login: " + error.message);
+            }
+        }
+
+        // Function to handle Google sign-in
+        async function signInWithGoogle() {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                redirectToWelcomePage(result.user);
+            } catch (error) {
+                alert("Error during Google sign-in: " + error.message);
+            }
+        }
+
+        // Function to redirect to welcome page
+        function redirectToWelcomePage(user) {
+            window.location.href = `welcome.html?email=${encodeURIComponent(user.email)}`;
+        }
+
+        window.handleAuth = function (isSignUp) {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (isSignUp) {
+                signUp(email, password);
+            } else {
+                login(email, password);
+            }
+        };
+
+        window.handleGoogleSignIn = signInWithGoogle;
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="email"], input[type="password"] {
+            width: 95%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .google-btn {
+            background-color: #4285F4;
+        }
+        .google-btn:hover {
+            background-color: #357ae8;
+        }
+        .toggle-form {
+            text-align: center;
+            margin-top: 10px;
+            cursor: pointer;
+            color: #007bff;
+        }
+        .toggle-form:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="form-container">
+    <h2 id="form-title">Sign Up</h2>
+    
+    <!-- Sign Up Form -->
+    <form id="signup-form">
+        <input type="text" id="username" placeholder="Username" required><br>
+        <input type="email" id="email" placeholder="Email" required><br>
+        <input type="password" id="password" placeholder="Password" required><br>
+        <button type="button" onclick="handleAuth(true)">Sign Up</button>
+    </form>
+
+    <!-- Google Sign-In Button -->
+    <button type="button" class="google-btn" onclick="handleGoogleSignIn()">Sign in with Google</button>
+
+    <!-- Toggle between login and sign-up -->
+    <div class="toggle-form" id="toggle-form">Already have an account? Login here</div>
+</div>
+
+<script>
+    const formTitle = document.getElementById('form-title');
+    const signupForm = document.getElementById('signup-form');
+    const toggleForm = document.getElementById('toggle-form');
+
+    // Toggle between login and sign-up form
+    toggleForm.addEventListener('click', () => {
+        if (formTitle.innerText === 'Sign Up') {
+            formTitle.innerText = 'Login';
+            signupForm.innerHTML = `
+                <input type="email" id="email" placeholder="Email" required><br>
+                <input type="password" id="password" placeholder="Password" required><br>
+                <button type="button" onclick="handleAuth(false)">Login</button>
+            `;
+            toggleForm.innerText = "Don't have an account? Sign up here";
+        } else {
+            formTitle.innerText = 'Sign Up';
+            signupForm.innerHTML = `
+                <input type="text" id="username" placeholder="Username" required><br>
+                <input type="email" id="email" placeholder="Email" required><br>
+                <input type="password" id="password" placeholder="Password" required><br>
+                <button type="button" onclick="handleAuth(true)">Sign Up</button>
+            `;
+            toggleForm.innerText = "Already have an account? Login here";
+        }
+    });
+</script>
+
+</body>
+</html>
